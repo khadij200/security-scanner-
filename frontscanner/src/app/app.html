@@ -1,0 +1,59 @@
+<div class="container">
+  <h2>🛡️ أداة فحص الأمان</h2>
+
+  <div class="search-box">
+    <input
+      [(ngModel)]="url"
+      placeholder="أدخل رابط الموقع مثل https://example.com"
+      (keyup.enter)="runScan()"
+    />
+    <button (click)="runScan()" [disabled]="loading()">
+      {{ loading() ? 'جاري الفحص...' : 'فحص' }}
+    </button>
+  </div>
+
+  <div *ngIf="result() && !result().error" class="result-card">
+    <div class="result-header">
+      <span>{{ result().url }}</span>
+      <span class="status-badge" [class.status-ok]="result().status_code === 200">
+        {{ result().status_code }}
+      </span>
+    </div>
+
+    <table>
+      <tr *ngFor="let item of getHeadersList()">
+        <td class="header-name">{{ item.key }}</td>
+        <td>
+          <span class="badge" [class.badge-green]="item.value" [class.badge-red]="!item.value">
+            {{ item.value ? '✅ موجود' : '❌ غير موجود' }}
+          </span>
+        </td>
+      </tr>
+    </table>
+
+    <div class="ssl-section" *ngIf="result().ssl">
+      <h3>🔒 شهادة SSL</h3>
+      <div *ngIf="result().ssl.valid" class="ssl-valid">
+        <p>✅ الشهادة سارية المفعول</p>
+        <p>تنتهي بتاريخ: {{ result().ssl.expires }}</p>
+        <p>باقي عليها: {{ result().ssl.days_left }} يوم</p>
+      </div>
+      <div *ngIf="!result().ssl.valid" class="ssl-invalid">
+        ❌ الشهادة غير سارية أو فيه مشكلة بالاتصال الآمن
+      </div>
+    </div>
+
+    <button class="explain-btn" (click)="explainScan()" [disabled]="explaining()">
+      {{ explaining() ? 'جاري التحليل...' : '🤖 اشرح لي النتيجة' }}
+    </button>
+
+    <div class="explanation-box" *ngIf="explanation()">
+      <h3>📋 الشرح والنصائح</h3>
+      <p>{{ explanation() }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="result() && result().error" class="error-box">
+    ⚠️ {{ result().error }}
+  </div>
+</div>  
